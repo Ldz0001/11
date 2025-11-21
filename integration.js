@@ -2,7 +2,7 @@
   'use strict';
 
   function fmtMoney(n){
-    const sym = global.store?.data?.settings?.currencySymbol || '€';
+    const sym = global.store?.data?.settings?.currencySymbol || 'MX$';
     const v = Number(n)||0;
     return sym + v.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0});
   }
@@ -11,18 +11,14 @@
     return v.toFixed(1) + '%';
   }
 
-  function getCurrentEvent(){
-    const events = global.store?.data?.events || [];
-    const id = global.state?.currentEventId;
-    return id ? events.find(e=>e.id===id) : (global.state?.graph?.scoped?.events?.list||events)[0] || null;
+  function scopedRevenueSnapshot(){
+    if(typeof global.KPI?.aggregateScopeFinancials !== 'function') return null;
+    return global.KPI.aggregateScopeFinancials(global.state?.graph, global.store);
   }
 
   function updateProfitKPIs(){
-    const ev = getCurrentEvent();
-    if(!ev) return;
-
-    const totals = global.KPI.sumBudgetTotalsForEvent(ev.id, global.store);
-    const k = global.KPI.computeRevenueKPIs(ev, totals);
+    const k = scopedRevenueSnapshot();
+    if(!k) return;
 
     const elRev = document.getElementById('kpiRevenue');
     const elProf = document.getElementById('kpiProfit');
@@ -35,31 +31,55 @@
     if(elProf) elProf.textContent = fmtMoney(k.profit);
     if(elMar) elMar.textContent = fmtPct(k.marginPct);
 
-    if(subRev) subRev.textContent = 'Actual revenue';
-    if(subProf) subProf.textContent = 'Revenue - cost';
-    if(subMar) subMar.textContent = k.revenue>0 ? ('Margin on actual revenue') : 'No revenue yet';
+    if(subRev){
+      if(k.revenue>0 || k.paymentReceived>0 || k.revenuePlanned>0){
+        subRev.textContent = `Forecast ${fmtMoney(k.revenuePlanned)} • Payment received ${fmtMoney(k.paymentReceived)} • Not received yet ${fmtMoney(k.pendingReceipt)}`;
+      } else {
+        subRev.textContent = k.hasEvents ? 'Add revenue to your events' : 'No events yet';
+      }
+    }
+    if(subProf){
+      if(k.revenuePlanned || k.costPlanned){
+        subProf.textContent = `Forecast of profit ${fmtMoney(k.profitForecast)} • Costs forecast ${fmtMoney(k.costPlanned)}`;
+      } else {
+        subProf.textContent = k.cost>0 ? 'Revenue - cost' : 'Add costs to see profit';
+      }
+    }
+    if(subMar) subMar.textContent = k.revenue>0 ? ('Margin on actual revenue') : 'Add revenue to compute margin';
 
     // attach details to existing KPI panel if available
     global.state = global.state || {};
     global.state.kpiDetails = global.state.kpiDetails || {};
     global.state.kpiDetails.revenue = {
       title: 'Revenue',
-      intro: 'Actual revenue for the selected event.',
-      items: [{ primary: fmtMoney(k.revenue), secondary: 'Actual revenue' }]
+      intro: 'Revenue across the scoped events.',
+      items: [
+        { primary: fmtMoney(k.revenue), secondary: 'Recognized revenue' },
+        { primary: fmtMoney(k.revenuePlanned), secondary: 'Forecast' },
+        { primary: fmtMoney(k.paymentReceived), secondary: 'Payment received' },
+        { primary: fmtMoney(k.pendingReceipt), secondary: 'Not received yet' }
+      ]
     };
     global.state.kpiDetails.profit = {
       title: 'Profit',
-      intro: 'Actual profit for the selected event.',
+      intro: 'Actual profit for the scoped events.',
       items: [
-        { primary: fmtMoney(k.revenue), secondary: 'Revenue' },
-        { primary: fmtMoney(k.cost), secondary: 'Cost' },
-        { primary: fmtMoney(k.profit), secondary: 'Profit' }
+        { primary: fmtMoney(k.profit), secondary: 'Actual profit' },
+        { primary: fmtMoney(k.profitForecast), secondary: 'Forecast of profit' },
+        { primary: fmtMoney(k.costPlanned), secondary: 'Costs forecast' },
+        { primary: fmtMoney(k.vendorPaid), secondary: 'Payments made to vendors' },
+        { primary: fmtMoney(k.pendingVendor), secondary: 'Not yet made' }
       ]
     };
     global.state.kpiDetails.margin = {
       title: 'Margin %',
-      intro: 'Profit as a percentage of revenue.',
-      items: [{ primary: fmtPct(k.marginPct), secondary: 'Margin' }]
+      intro: 'Profit as a percentage of revenue for the scoped events.',
+      items: [
+        { primary: fmtPct(k.marginPct), secondary: 'Margin' },
+        { primary: fmtMoney(k.profit), secondary: 'Profit (recognized)' },
+        { primary: fmtMoney(k.revenue), secondary: 'Revenue (recognized)' },
+        { primary: fmtMoney(k.cost), secondary: 'Vendor costs (recognized)' }
+      ]
     };
   }
 
