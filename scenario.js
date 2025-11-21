@@ -30,7 +30,8 @@
           const q = global.Pricing.sanitizeQty(s.qty ?? lineQty);
           return { ...s, qty: q * guestMultiplier };
         });
-        const forecast = global.Pricing.calculateServicePriceTotals(cloned.vendorServices, lineQty);
+        const totals = global.Pricing.calculateServicePriceTotals(cloned.vendorServices, lineQty);
+        const forecast = totals?.total || 0;
         const actual = forecast;
         return { ...cloned, _scenarioForecast: forecast, _scenarioActual: actual };
       } else {
