@@ -1099,7 +1099,7 @@ Perf notes:
 <div aria-label="Budget lines" class="table-wrap" role="region">
 <table id="tblBudget">
 <thead><tr>
-<th scope="col">Event</th><th scope="col">Category</th><th scope="col">Item</th><th scope="col">Vendor</th><th scope="col">Qty</th><th scope="col">Unit Cost</th><th scope="col">Tax %</th><th scope="col">Forecast</th><th scope="col">Actual</th><th scope="col">Variance</th><th scope="col">Vendor Status</th><th scope="col">Payment</th><th scope="col">Payment Received</th><th scope="col">Vendor Paid</th><th scope="col">Proof</th><th scope="col">Confirmation</th><th class="no-print" scope="col">Actions</th>
+<th scope="col">Event</th><th scope="col">Category</th><th scope="col">Item</th><th scope="col">Vendor</th><th scope="col">Qty</th><th scope="col">Unit Cost</th><th scope="col">Tax %</th><th scope="col">Forecast</th><th scope="col">Actual</th><th scope="col">Variance</th><th scope="col">Vendor Status</th><th scope="col">Payment Received</th><th scope="col">Vendor Paid</th><th scope="col">Proof</th><th scope="col">Confirmation</th><th class="no-print" scope="col">Actions</th>
 </tr></thead><tbody></tbody>
 <tfoot><tr>
 <th colspan="7" scope="row">Totals</th>
@@ -1139,7 +1139,6 @@ Perf notes:
 <div><div class="small">Forecast</div><input data-testid="budget-forecast" id="bForecast" min="0" step="0.01" type="number" value="0"/></div>
 <div><div class="small">Actual</div><input data-testid="budget-actual" id="bActual" min="0" step="0.01" type="number" value="0"/></div>
 <div><div class="small">Vendor confirmation</div><label class="checkbox"><input id="bVendorConfirmed" type="checkbox"/> Vendor will deliver</label></div>
-<div><div class="small">Payment status</div><select id="bPaymentStatus"><option value="unpaid">Unpaid</option><option value="paid">Paid</option></select></div>
 <div><div class="small">Payment received</div><label class="checkbox"><input id="bPaymentReceived" type="checkbox"/> Payment received &amp; confirmed</label></div>
 <div><div class="small">Vendor paid</div><label class="checkbox"><input id="bVendorPaid" type="checkbox"/> Vendor invoice settled</label></div>
 <div style="grid-column:1 / span 2;"><div class="small">Payment proof (PDF)</div><label class="ghost file-trigger" for="bProof"><svg class="icon"><use href="#ic-upload"></use></svg> <span id="bProofLabel">Upload proof</span></label><input accept="application/pdf" class="sr-only" id="bProof" type="file"/><div class="small muted" id="bProofMeta"></div></div>
@@ -2029,9 +2028,9 @@ function seedDemo(){
     { id:uid("ven"), name:"FotoPro MX", company:"FotoPro", role:"Photography", email:"info@fotopro.mx", phone:"+52 33 1111 2222", contract:"Signed", docs:"Contract", docFiles:[], services:[photoSvc] }
   ];
     const budget=[
-      { id:uid("bud"), eventId:ev[0].id, cat:"Venue", item:"Hall Rental", qty:1, unit:25000, tax:16, forecast:29000, actual:0, notes:"Includes chairs", vendorConfirmed:false, paymentStatus:'unpaid' },
-      { id:uid("bud"), eventId:ev[0].id, cat:"Catering", item:"Dinner", qty:120, unit:550, tax:16, vendorId: vendors[0].id, vendorServiceId: cateringSvc.id, catalogRefId: cateringSvc.refId, catalogType: cateringSvc.type, forecast:0, actual:cateringSvc.price, vendorConfirmed:true, paymentStatus:'paid', notes:"3-course" },
-      { id:uid("bud"), eventId:ev[2].id, cat:"Music", item:"DJ Package", qty:1, unit:8000, tax:0, forecast:8000, actual:0, notes:"", vendorId: vendors[1].id, vendorServiceId: photoSvc.id, catalogRefId: photoSvc.refId, catalogType: photoSvc.type, vendorConfirmed:false, paymentStatus:'unpaid' }
+      { id:uid("bud"), eventId:ev[0].id, cat:"Venue", item:"Hall Rental", qty:1, unit:25000, tax:16, forecast:29000, actual:0, notes:"Includes chairs", vendorConfirmed:false, paymentReceived:false, vendorPaid:false },
+      { id:uid("bud"), eventId:ev[0].id, cat:"Catering", item:"Dinner", qty:120, unit:550, tax:16, vendorId: vendors[0].id, vendorServiceId: cateringSvc.id, catalogRefId: cateringSvc.refId, catalogType: cateringSvc.type, forecast:0, actual:cateringSvc.price, vendorConfirmed:true, paymentReceived:true, vendorPaid:true, notes:"3-course" },
+      { id:uid("bud"), eventId:ev[2].id, cat:"Music", item:"DJ Package", qty:1, unit:8000, tax:0, forecast:8000, actual:0, notes:"", vendorId: vendors[1].id, vendorServiceId: photoSvc.id, catalogRefId: photoSvc.refId, catalogType: photoSvc.type, vendorConfirmed:false, paymentReceived:false, vendorPaid:false }
     ];
   const pois=[
     { id:uid("poi"), label:"Hotel Centro", type:"Hotel", lat:19.434, lon:-99.14, address:"Hotel Centro Histórico, Ciudad de México", eventId:ev[0].id },
@@ -5003,9 +5002,6 @@ qs('#bProof')?.addEventListener('change', async (e)=>{
       const vendorConfirmClass = b.vendorConfirmed ? 's-completed' : 's-warning';
       const vendorConfirmText = b.vendorConfirmed ? 'Vendor confirmed' : 'Awaiting vendor';
       const vendorConfirmBtn = `<button class="${b.vendorConfirmed?'ghost':'success'}" title="${b.vendorConfirmed?'Mark unconfirmed':'Vendor will deliver'}" onclick="toggleVendorCommitment('${b.id}')"><svg class="icon"><use href="${b.vendorConfirmed?'#ic-refresh':'#ic-check'}"></use></svg></button>`;
-      const paymentStatus = (b.paymentStatus||'unpaid') === 'paid' ? 'Paid' : 'Unpaid';
-      const paymentClass = paymentStatus==='Paid' ? 's-completed' : 's-warning';
-      const paymentBtn = `<button class="${paymentStatus==='Paid'?'ghost':'success'}" title="${paymentStatus==='Paid'?'Mark unpaid':'Mark paid'}" onclick="togglePaymentStatus('${b.id}')"><svg class="icon"><use href="${paymentStatus==='Paid'?'#ic-refresh':'#ic-check'}"></use></svg></button>`;
       const paymentReceived = b.paymentReceived === true;
       const paymentReceivedLabel = paymentReceived ? 'Received' : 'Pending receipt';
       const paymentReceivedClass = paymentReceived ? 's-completed' : 's-warning';
@@ -5015,7 +5011,7 @@ qs('#bProof')?.addEventListener('change', async (e)=>{
       const vendorPaidClass = vendorPaid ? 's-completed' : 's-warning';
       const vendorPaidBtn = `<button class="${vendorPaid?'ghost':'success'}" title="${vendorPaid?'Mark unpaid':'Mark vendor paid'}" onclick="toggleVendorPaid('${b.id}')"><svg class="icon"><use href="${vendorPaid?'#ic-refresh':'#ic-check'}"></use></svg></button>`;
       const proofCell = b.paymentProofData ? `<button class="ghost" onclick="openPaymentProof('${b.id}')"><svg class="icon"><use href="#ic-download"></use></svg> View</button>` : '<span class="small muted">None</span>';
-      tr.innerHTML=`<td>${ev?ev.title:"—"}</td><td>${b.cat||""}</td><td>${b.item||""}</td><td>${vendorCell}</td><td>${b.qty??1}</td><td>${fmtMoney(b.unit||0)}</td><td>${toNumber(b.tax||0).toFixed(2)}</td><td>${fmtMoney(forecast)}</td><td>${fmtMoney(actual)}</td><td>${fmtMoney(variance)}</td><td><span class="status ${vendorConfirmClass}">${vendorConfirmText}</span> ${vendorConfirmBtn}</td><td><span class="status ${paymentClass}">${paymentStatus}</span> ${paymentBtn}</td><td><span class="status ${paymentReceivedClass}">${paymentReceivedLabel}</span> ${paymentReceivedBtn}</td><td><span class="status ${vendorPaidClass}">${vendorPaidLabel}</span> ${vendorPaidBtn}</td><td>${proofCell}</td><td class="budget-confirmation ${confirmationClass}">${confirmationLabel}</td><td class="row no-print">${toggleBtn}<button class="ghost" title="Edit" onclick="editLine('${b.id}')"><svg class="icon"><use href="#ic-edit"></use></svg></button><button class="danger" title="Delete" onclick="delLine('${b.id}')"><svg class="icon"><use href="#ic-trash"></use></svg></button></td>`;
+      tr.innerHTML=`<td>${ev?ev.title:"—"}</td><td>${b.cat||""}</td><td>${b.item||""}</td><td>${vendorCell}</td><td>${b.qty??1}</td><td>${fmtMoney(b.unit||0)}</td><td>${toNumber(b.tax||0).toFixed(2)}</td><td>${fmtMoney(forecast)}</td><td>${fmtMoney(actual)}</td><td>${fmtMoney(variance)}</td><td><span class="status ${vendorConfirmClass}">${vendorConfirmText}</span> ${vendorConfirmBtn}</td><td><span class="status ${paymentReceivedClass}">${paymentReceivedLabel}</span> ${paymentReceivedBtn}</td><td><span class="status ${vendorPaidClass}">${vendorPaidLabel}</span> ${vendorPaidBtn}</td><td>${proofCell}</td><td class="budget-confirmation ${confirmationClass}">${confirmationLabel}</td><td class="row no-print">${toggleBtn}<button class="ghost" title="Edit" onclick="editLine('${b.id}')"><svg class="icon"><use href="#ic-edit"></use></svg></button><button class="danger" title="Delete" onclick="delLine('${b.id}')"><svg class="icon"><use href="#ic-trash"></use></svg></button></td>`;
       frag.appendChild(tr);
     });
   tbody.appendChild(frag);
@@ -5023,7 +5019,7 @@ qs('#bProof')?.addEventListener('change', async (e)=>{
   qs("#sumActual").textContent=fmtMoney(sumA);
   qs("#sumVariance").textContent=fmtMoney(sumA-sumF);
 }
-    function resetLineForm(){ ["bId","bCat","bItem","bNotes"].forEach(id=>{const el=qs("#"+id); if(el) el.value=""}); ["bQty","bUnit","bTax","bForecast","bActual"].forEach(id=>{const el=qs("#"+id); if(el) el.value="0"}); setBudgetCatalogContext('', ''); state.budgetServiceDrafts=[{ vendorId:'', vendorServiceId:'', name:'', qty:1 }]; fillEventSelectors(); renderBudgetServiceRows(); const vendorConfirm=qs('#bVendorConfirmed'); if(vendorConfirm) vendorConfirm.checked=false; const paymentSel=qs('#bPaymentStatus'); if(paymentSel) paymentSel.value='unpaid'; const paymentReceived=qs('#bPaymentReceived'); if(paymentReceived) paymentReceived.checked=false; const vendorPaid=qs('#bVendorPaid'); if(vendorPaid) vendorPaid.checked=false; clearBudgetProofDraft(); }
+    function resetLineForm(){ ["bId","bCat","bItem","bNotes"].forEach(id=>{const el=qs("#"+id); if(el) el.value=""}); ["bQty","bUnit","bTax","bForecast","bActual"].forEach(id=>{const el=qs("#"+id); if(el) el.value="0"}); setBudgetCatalogContext('', ''); state.budgetServiceDrafts=[{ vendorId:'', vendorServiceId:'', name:'', qty:1 }]; fillEventSelectors(); renderBudgetServiceRows(); const vendorConfirm=qs('#bVendorConfirmed'); if(vendorConfirm) vendorConfirm.checked=false; const paymentReceived=qs('#bPaymentReceived'); if(paymentReceived) paymentReceived.checked=false; const vendorPaid=qs('#bVendorPaid'); if(vendorPaid) vendorPaid.checked=false; clearBudgetProofDraft(); }
     function editLine(id){
       const b=store.data.budget.find(x=>x.id===id); if(!b) return;
       qs("#bId").value=b.id; qs("#bEvent").value=b.eventId||""; qs("#bCat").value=b.cat||""; qs("#bItem").value=b.item||"";
@@ -5035,7 +5031,6 @@ qs('#bProof')?.addEventListener('change', async (e)=>{
       renderBudgetServiceRows();
       qs("#bQty").value=b.qty??1; qs("#bUnit").value=b.unit??0; qs("#bTax").value=b.tax??0; qs("#bForecast").value=b.forecast??0; qs("#bActual").value=b.actual??0; qs("#bNotes").value=b.notes||"";
       const vendorConfirm=qs('#bVendorConfirmed'); if(vendorConfirm) vendorConfirm.checked = Boolean(b.vendorConfirmed);
-      const paymentSel=qs('#bPaymentStatus'); if(paymentSel) paymentSel.value = b.paymentStatus || 'unpaid';
       const paymentReceived=qs('#bPaymentReceived'); if(paymentReceived) paymentReceived.checked = Boolean(b.paymentReceived);
       const vendorPaid=qs('#bVendorPaid'); if(vendorPaid) vendorPaid.checked = Boolean(b.vendorPaid);
   state.budgetProofDraft = b.paymentProofData ? { name: b.paymentProofName, data: b.paymentProofData } : null;
@@ -5047,13 +5042,6 @@ function toggleVendorCommitment(id){
   const line = store.data.budget.find(x=>x.id===id);
   if(!line) return;
   line.vendorConfirmed = !line.vendorConfirmed;
-  store.save();
-  renderAll('budget');
-}
-function togglePaymentStatus(id){
-  const line = store.data.budget.find(x=>x.id===id);
-  if(!line) return;
-  line.paymentStatus = line.paymentStatus === 'paid' ? 'unpaid' : 'paid';
   store.save();
   renderAll('budget');
 }
@@ -5120,7 +5108,7 @@ function toggleLineConfirmation(id){
         const serviceTotals = calculateServicePriceTotals(serviceDrafts, lineQty || 1);
         const derivedActual = serviceTotals.hasPricedService ? serviceTotals.total : toNumber(qs("#bActual")?.value);
         const resolvedUnit = unitInput || (serviceTotals.firstPrice ?? 0);
-        const b={ id:(qs("#bId")?.value||"").trim()||null, eventId:qs("#bEvent")?.value||"", cat:qs("#bCat")?.value.trim(), item:qs("#bItem")?.value.trim(), vendorId:primaryService.vendorId||"", vendorServiceId:primaryService.vendorServiceId||"", vendorServices:serviceDrafts, qty:lineQty, unit:resolvedUnit, tax:toNumber(qs("#bTax")?.value), forecast:toNumber(qs("#bForecast")?.value), actual:derivedActual, vendorConfirmed:Boolean(qs('#bVendorConfirmed')?.checked), paymentStatus:(qs('#bPaymentStatus')?.value||'unpaid'), paymentReceived:Boolean(qs('#bPaymentReceived')?.checked), vendorPaid:Boolean(qs('#bVendorPaid')?.checked), paymentProofName:state.budgetProofDraft?.name||"", paymentProofData:state.budgetProofDraft?.data||"", catalogRefId:(qs('#bCatalogRef')?.value||'').trim(), catalogType:(qs('#bCatalogType')?.value||'').trim(), notes:qs("#bNotes")?.value.trim() };
+        const b={ id:(qs("#bId")?.value||"").trim()||null, eventId:qs("#bEvent")?.value||"", cat:qs("#bCat")?.value.trim(), item:qs("#bItem")?.value.trim(), vendorId:primaryService.vendorId||"", vendorServiceId:primaryService.vendorServiceId||"", vendorServices:serviceDrafts, qty:lineQty, unit:resolvedUnit, tax:toNumber(qs("#bTax")?.value), forecast:toNumber(qs("#bForecast")?.value), actual:derivedActual, vendorConfirmed:Boolean(qs('#bVendorConfirmed')?.checked), paymentReceived:Boolean(qs('#bPaymentReceived')?.checked), vendorPaid:Boolean(qs('#bVendorPaid')?.checked), paymentProofName:state.budgetProofDraft?.name||"", paymentProofData:state.budgetProofDraft?.data||"", catalogRefId:(qs('#bCatalogRef')?.value||'').trim(), catalogType:(qs('#bCatalogType')?.value||'').trim(), notes:qs("#bNotes")?.value.trim() };
   if(b.id){
     const existing=store.data.budget.find(x=>x.id===b.id);
       if(existing){
@@ -5171,7 +5159,7 @@ qs("#btnExportCSV")?.addEventListener("click",()=>{
         const totals = calculateServicePriceTotals(serviceEntries, b.qty ?? 1);
         const actual=totals.hasPricedService ? totals.total : toNumber(b.actual);
         const variance=actual-forecast;
-      const row=[(ev?ev.title:""), b.cat||"", b.item||"", vendorName, serviceName, b.qty??1, b.unit??0, b.tax??0, forecast, actual, variance, (b.vendorConfirmed?"Vendor confirmed":"Awaiting vendor"), (b.paymentStatus==='paid'?'Paid':'Unpaid'), (b.paymentReceived?'Received':'Pending'), (b.vendorPaid?'Paid':'Unpaid'), (b.paymentProofData?'Yes':'No'), (b.confirmed?"Confirmed":"Pending"), (b.notes||"").replace(/,/g,";")];
+      const row=[(ev?ev.title:""), b.cat||"", b.item||"", vendorName, serviceName, b.qty??1, b.unit??0, b.tax??0, forecast, actual, variance, (b.vendorConfirmed?"Vendor confirmed":"Awaiting vendor"), (b.paymentReceived?'Received':'Pending'), (b.vendorPaid?'Paid':'Unpaid'), (b.paymentProofData?'Yes':'No'), (b.confirmed?"Confirmed":"Pending"), (b.notes||"").replace(/,/g,";")];
     csv+=row.join(",")+"\n";
   });
   const blob=new Blob([csv],{type:"text/csv"});

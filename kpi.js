@@ -10,9 +10,9 @@
 
     for(const line of budget){
       const lineQty = Number(line.qty ?? 1) || 1;
-      const isPaid = (line.paymentStatus || 'unpaid') === 'paid';
       const paymentReceived = line.paymentReceived === true;
       const vendorPaid = line.vendorPaid === true;
+      const recognized = paymentReceived && vendorPaid;
 
       if(Array.isArray(line.vendorServices) && line.vendorServices.length){
         const f = global.Pricing.calculateServicePriceTotals(line.vendorServices, lineQty);
@@ -27,7 +27,7 @@
           const svcQty = Number(svc.qty ?? lineQty) || lineQty;
           const svcTotal = global.Pricing.resolveServicePrice(svc, global.vendorCatalog) * svcQty;
           byVendor.set(vId, (byVendor.get(vId)||0) + svcTotal);
-          if(isPaid && paymentReceived && vendorPaid){
+          if(recognized){
             byVendorRecognized.set(vId, (byVendorRecognized.get(vId)||0) + svcTotal);
           }
         }
@@ -38,17 +38,15 @@
         const vId = line.vendorId;
         if(vId){
           byVendor.set(vId, (byVendor.get(vId)||0) + a);
-          if(isPaid && paymentReceived && vendorPaid){
+          if(recognized){
             byVendorRecognized.set(vId, (byVendorRecognized.get(vId)||0) + a);
           }
         }
       }
 
-      if(isPaid && paymentReceived){
+      if(recognized){
         recognizedRevenue += forecast;
-        if(vendorPaid){
-          recognizedCost += actual;
-        }
+        recognizedCost += actual;
       }
     }
     return { forecast, actual, byVendor, byVendorRecognized, recognizedRevenue, recognizedCost };
