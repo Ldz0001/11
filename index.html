@@ -34,6 +34,14 @@ Perf notes:
 <!-- Leaflet (maps allowed to use CDN) -->
 <link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" rel="stylesheet"/>
 <script crossorigin="" defer="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script defer src="pricing.js"></script>
+<script defer src="catalog.js"></script>
+<script defer src="compare.js"></script>
+<script defer src="scenario.js"></script>
+<script defer src="kpi.js"></script>
+<script defer src="migration.js"></script>
+<script defer src="app.js"></script>
+<script defer src="integration.js"></script>
 <style>
     :root{
       --bg:#F6F3FF; --overlay: radial-gradient(900px 500px at -150px -200px,#d8ccff55,transparent 60%), radial-gradient(1000px 600px at 120% -100px,#e9e2ff66,transparent 60%), #F6F3FF;
@@ -637,7 +645,12 @@ Perf notes:
 #leafletMap{ position: relative; } /* ensures empty overlay anchors correctly */
 
   </style>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@5.0.2/dist/jspdf.plugin.autotable.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script><script src="https://cdn.jsdelivr.net/npm/docx@9.5.1/dist/index.iife.js"></script><script src="app.js"></script></head>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@5.0.2/dist/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@9.5.1/dist/index.iife.js"></script>
+</head>
 <body>
 <a class="skip" data-testid="skip-link" href="#main">Skip to content</a>
 <!-- Inline SVG sprite -->
