@@ -48,13 +48,23 @@
   function calculateServicePriceTotals(entries, fallbackQty, catalog){
     const fb = sanitizeQty(fallbackQty);
     const c = getCatalog(catalog);
+
     let total = 0;
+    let firstPrice = null;
+    let hasPricedService = false;
+
     (Array.isArray(entries)?entries:[]).forEach(entry=>{
       const svc = getServiceFromEntry(entry);
+      const price = resolveServicePrice(svc, c);
+      if(!Number.isFinite(price)) return;
+
       const qty = sanitizeQty(entry.qty ?? fb);
-      total += resolveServicePrice(svc, c) * qty;
+      total += price * qty;
+      hasPricedService = true;
+      if(firstPrice === null) firstPrice = price;
     });
-    return total;
+
+    return { total, firstPrice, hasPricedService };
   }
 
   global.Pricing = { sanitizeQty, resolveServicePrice, calculateServicePriceTotals };
