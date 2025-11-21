@@ -1588,7 +1588,7 @@ function getCurrentProfile(){
 function applyProfileConstraints(profile){
   const accessibleIds=new Set(accessibleEvents(profile).map(e=>e.id));
   if(state.filters.eventId && !accessibleIds.has(state.filters.eventId)){
-    state.filters.eventId="";
+    setCurrentEvent("");
     const scopeSel=qs("#scopeEvent"); if(scopeSel) scopeSel.value="";
   }
 }
@@ -1908,6 +1908,7 @@ applyTheme=function(theme){
 /* ---------- State & Filters ---------- */
   const state={
     filters:{ search:"", type:"", status:"", from:"", to:"", eventId:"" },
+    currentEventId:"",
     currentRoute:"#/dashboard",
     currentTab:"dashboard",
     currentProfileId:null,
@@ -1924,11 +1925,18 @@ applyTheme=function(theme){
     editingEventId:null,
     graph:null,
     vendorServicesDraft:[],
-      vendorDocsDraft:[],
+    vendorDocsDraft:[],
       budgetServiceDrafts:[],
       budgetProofDraft:null,
       budgetCatalogContext:null
   };
+
+  window.state = state;
+
+  function setCurrentEvent(eventId){
+    state.filters.eventId = eventId || "";
+    state.currentEventId = state.filters.eventId;
+  }
 let eventAddrAuto=null;
 let poiAddrAuto=null;
 const GLOBAL_ZOOM_KEY="epp_zoom_global_v1";
@@ -1962,7 +1970,7 @@ qsa('nav .tab-btn').forEach(btn=>btn.addEventListener("click",()=>navigate(btn.g
 
 // ---------- Global Scope Selector ----------
 qs("#scopeEvent")?.addEventListener("change", (e)=>{
-  state.filters.eventId = e.target.value || "";
+  setCurrentEvent(e.target.value || "");
   renderAll();
   if (state.currentTab === "map") safe(renderMap);
 });
@@ -2051,7 +2059,7 @@ qs("#btnClearFilters")?.addEventListener("click", ()=>{
   ["fSearch","fType","fStatus","fFrom","fTo"].forEach(id=>{ const el=qs("#"+id); if(el) el.value="" });
   onFilterChange();
  // ---- Also clear global scope and search ----
-  state.filters.eventId = "";
+  setCurrentEvent("");
   const sel = qs("#scopeEvent"); if(sel) sel.value = "";
   const gs = qs("#globalSearch"); if(gs) gs.value = "";
   renderAll();
@@ -5688,7 +5696,7 @@ function renderGlobalSuggestions(q){
 function selectGlobal(id){
   const ev=accessibleEvents().find(e=>e.id===id);
   if(!ev) return;
-  state.filters.eventId=id;
+  setCurrentEvent(id);
   const inp=qs("#globalSearch"); if(inp) inp.value=ev.title;
   const sel=qs("#scopeEvent");  if(sel) sel.value=id;
   hideGlobal();
