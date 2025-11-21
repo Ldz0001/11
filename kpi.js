@@ -26,14 +26,21 @@
         lineActual = Number.isFinite(explicitActual) ? explicitActual : totals.total;
         forecast += lineForecast; actual += lineActual;
 
+        const svcTotals = [];
+        let svcTotalsSum = 0;
         for(const svc of line.vendorServices){
           const vId = svc.vendorId || line.vendorId;
           if(!vId) continue;
           const svcQty = Number(svc.qty ?? lineQty) || lineQty;
           const svcTotal = global.Pricing.resolveServicePrice(svc, global.vendorCatalog) * svcQty;
+          svcTotalsSum += svcTotal;
+          svcTotals.push({ vId, svcTotal });
           byVendor.set(vId, (byVendor.get(vId)||0) + svcTotal);
-          if(recognized){
-            byVendorRecognized.set(vId, (byVendorRecognized.get(vId)||0) + svcTotal);
+        }
+        if(recognized && svcTotalsSum > 0){
+          for(const { vId, svcTotal } of svcTotals){
+            const recognizedShare = lineActual * (svcTotal / svcTotalsSum);
+            byVendorRecognized.set(vId, (byVendorRecognized.get(vId)||0) + recognizedShare);
           }
         }
       } else {
