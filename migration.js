@@ -22,7 +22,7 @@
         companyLogoUrl: data.settings?.companyLogoUrl || "",
         companyAddress: data.settings?.companyAddress || "",
         termsFooter: data.settings?.termsFooter || "",
-        currencySymbol: data.settings?.currencySymbol || "€",
+        currencySymbol: data.settings?.currencySymbol || "MX$",
         ...data.settings
       };
       // Comparison/scenario collections
