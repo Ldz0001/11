@@ -4,11 +4,16 @@
   // Sum budget totals for an event, respecting multi-vendor lines introduced in P0.
   function sumBudgetTotalsForEvent(eventId, store){
     const budget = (store?.data?.budget || []).filter(l => l.eventId === eventId);
-    let forecast = 0, actual = 0;
+    let forecast = 0, actual = 0, recognizedRevenue = 0, recognizedCost = 0;
     const byVendor = new Map();
+    const byVendorRecognized = new Map();
 
     for(const line of budget){
       const lineQty = Number(line.qty ?? 1) || 1;
+      const paymentReceived = line.paymentReceived === true;
+      const vendorPaid = line.vendorPaid === true;
+      const recognized = paymentReceived && vendorPaid;
+
       if(Array.isArray(line.vendorServices) && line.vendorServices.length){
         const f = global.Pricing.calculateServicePriceTotals(line.vendorServices, lineQty);
         const a = (line.actualOverride === true)
@@ -22,6 +27,9 @@
           const svcQty = Number(svc.qty ?? lineQty) || lineQty;
           const svcTotal = global.Pricing.resolveServicePrice(svc, global.vendorCatalog) * svcQty;
           byVendor.set(vId, (byVendor.get(vId)||0) + svcTotal);
+          if(recognized){
+            byVendorRecognized.set(vId, (byVendorRecognized.get(vId)||0) + svcTotal);
+          }
         }
       } else {
         const f = Number(line.forecast ?? 0) || 0;
@@ -30,20 +38,28 @@
         const vId = line.vendorId;
         if(vId){
           byVendor.set(vId, (byVendor.get(vId)||0) + a);
+          if(recognized){
+            byVendorRecognized.set(vId, (byVendorRecognized.get(vId)||0) + a);
+          }
         }
       }
+
+      if(recognized){
+        recognizedRevenue += forecast;
+        recognizedCost += actual;
+      }
     }
-    return { forecast, actual, byVendor };
+    return { forecast, actual, byVendor, byVendorRecognized, recognizedRevenue, recognizedCost };
   }
 
   function computeRevenueKPIs(event, totals){
-    const revenuePlanned = Number(event?.revenuePlanned ?? 0) || 0;
-    const revenueActual  = Number(event?.revenueActual ?? revenuePlanned) || 0;
+    const revenuePlanned = Number(totals?.forecast ?? event?.revenuePlanned ?? 0) || 0;
+    const revenueActual  = Number(totals?.recognizedRevenue ?? 0) || 0;
     const attendeesPlanned = Number(event?.attendeesPlanned ?? 0) || 0;
     const attendeesActual  = Number(event?.attendeesActual ?? attendeesPlanned) || 0;
 
     const revenue = revenueActual;
-    const cost = Number(totals?.actual ?? totals?.forecast ?? 0) || 0;
+    const cost = Number(totals?.recognizedCost ?? 0) || 0;
     const attendees = attendeesActual;
 
     const profit = revenue - cost;
