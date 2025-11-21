@@ -1943,6 +1943,8 @@ applyTheme=function(theme){
       budgetProofDraft:null,
       budgetCatalogContext:null
   };
+  // Expose state for integration hooks (e.g., KPI detail population)
+  window.state = state;
 let eventAddrAuto=null;
 let poiAddrAuto=null;
 const GLOBAL_ZOOM_KEY="epp_zoom_global_v1";
