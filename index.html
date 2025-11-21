@@ -34,6 +34,14 @@ Perf notes:
 <!-- Leaflet (maps allowed to use CDN) -->
 <link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" rel="stylesheet"/>
 <script crossorigin="" defer="" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script defer src="pricing.js"></script>
+<script defer src="catalog.js"></script>
+<script defer src="compare.js"></script>
+<script defer src="scenario.js"></script>
+<script defer src="kpi.js"></script>
+<script defer src="migration.js"></script>
+<script defer src="app.js"></script>
+<script defer src="integration.js"></script>
 <style>
     :root{
       --bg:#F6F3FF; --overlay: radial-gradient(900px 500px at -150px -200px,#d8ccff55,transparent 60%), radial-gradient(1000px 600px at 120% -100px,#e9e2ff66,transparent 60%), #F6F3FF;
@@ -637,7 +645,12 @@ Perf notes:
 #leafletMap{ position: relative; } /* ensures empty overlay anchors correctly */
 
   </style>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@5.0.2/dist/jspdf.plugin.autotable.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script><script src="https://cdn.jsdelivr.net/npm/docx@9.5.1/dist/index.iife.js"></script><script src="app.js"></script></head>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@5.0.2/dist/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@9.5.1/dist/index.iife.js"></script>
+</head>
 <body>
 <a class="skip" data-testid="skip-link" href="#main">Skip to content</a>
 <!-- Inline SVG sprite -->
@@ -827,6 +840,27 @@ Perf notes:
 <div class="kpi-sub" id="kpiRatingSummary">No ratings yet</div>
 </button>
 </div>
+<div aria-label="Actual revenue" class="card kpi" role="group">
+<button aria-controls="kpiDetailPanel" aria-expanded="false" class="kpi-trigger" data-kpi="revenue" type="button">
+<h3>Revenue</h3>
+<div class="value" id="kpiRevenue">MX$0</div>
+<div class="kpi-sub" id="kpiRevenueSummary">Actual revenue</div>
+</button>
+</div>
+<div aria-label="Actual profit" class="card kpi" role="group">
+<button aria-controls="kpiDetailPanel" aria-expanded="false" class="kpi-trigger" data-kpi="profit" type="button">
+<h3>Profit</h3>
+<div class="value" id="kpiProfit">MX$0</div>
+<div class="kpi-sub" id="kpiProfitSummary">Revenue - cost</div>
+</button>
+</div>
+<div aria-label="Profit margin" class="card kpi" role="group">
+<button aria-controls="kpiDetailPanel" aria-expanded="false" class="kpi-trigger" data-kpi="margin" type="button">
+<h3>Margin</h3>
+<div class="value" id="kpiMargin">0.0%</div>
+<div class="kpi-sub" id="kpiMarginSummary">Margin on actual revenue</div>
+</button>
+</div>
 </div>
 <div aria-labelledby="kpiDetailTitle" aria-live="polite" class="card kpi-detail" hidden="" id="kpiDetailPanel">
 <div class="row detail-header">
@@ -875,6 +909,42 @@ Perf notes:
 </div>
 <div aria-labelledby="h-analysis-forecast" id="analysisPredictions"></div>
 </article>
+<article class="card analysis-card" id="analysisProfitCard">
+<div class="row">
+<h4 id="h-profit">Profitability &amp; Vendors</h4>
+<div class="spacer"></div>
+<p class="small muted">Revenue, cost, and vendor impact across the current scope.</p>
+</div>
+<div class="analysis-mini-grid">
+  <div class="mini-card">
+    <div class="small muted">Revenue</div>
+    <div class="value" id="analysisRevenueValue">MX$0</div>
+    <div class="small" id="analysisRevenueDetail">No revenue captured</div>
+    <div class="small" id="analysisRevenueReceived">Payment received — MX$0</div>
+    <div class="small" id="analysisRevenuePending">Not received yet — MX$0</div>
+  </div>
+  <div class="mini-card">
+    <div class="small muted">Profit</div>
+    <div class="value" id="analysisProfitValue">MX$0</div>
+    <div class="small" id="analysisProfitDetail">Awaiting costs</div>
+    <div class="small" id="analysisProfitForecast">Forecast of profit — MX$0</div>
+    <div class="small" id="analysisCostForecast">Costs forecast — MX$0</div>
+    <div class="small" id="analysisCostPaid">Payments made to vendors — MX$0</div>
+    <div class="small" id="analysisCostPending">Not yet made — MX$0</div>
+  </div>
+  <div class="mini-card">
+    <div class="small muted">Margin</div>
+<div class="value" id="analysisMarginValue">0.0%</div>
+<div class="small" id="analysisMarginDetail">Based on actuals</div>
+</div>
+</div>
+<div class="hr"></div>
+<div class="row">
+<h5 style="margin:0">Top Vendors by Spend</h5>
+<div class="small muted" id="analysisVendorShare">Spend share across scoped events</div>
+</div>
+<ol class="compact-list" id="analysisVendorList"></ol>
+</article>
 </div>
 </section>
 <!-- EVENTS -->
@@ -914,6 +984,10 @@ Perf notes:
 <div class="autocomplete-list" id="addrList" role="listbox" style="display:none;"></div>
 </input></div>
 <div><div class="small">Owner</div><input data-testid="event-owner" id="eOwner" placeholder="owner@yourorg.com"/></div>
+<div><div class="small">Planned revenue</div><input data-testid="event-rev-plan" id="eRevenuePlanned" min="0" placeholder="e.g., 50000" step="1" type="number"/></div>
+<div><div class="small">Actual revenue</div><input data-testid="event-rev-actual" id="eRevenueActual" min="0" placeholder="e.g., 48000" step="1" type="number"/></div>
+<div><div class="small">Planned attendees</div><input data-testid="event-att-plan" id="eAttendeesPlanned" min="0" placeholder="e.g., 150" step="1" type="number"/></div>
+<div><div class="small">Actual attendees</div><input data-testid="event-att-actual" id="eAttendeesActual" min="0" placeholder="e.g., 142" step="1" type="number"/></div>
 <div><div class="small">Latitude</div><input data-testid="event-lat" id="eLat" placeholder="auto from address" step="any" type="number"/></div>
 <div><div class="small">Longitude</div><input data-testid="event-lon" id="eLon" placeholder="auto from address" step="any" type="number"/></div>
 </form>
@@ -1031,13 +1105,16 @@ Perf notes:
 <div aria-label="Budget lines" class="table-wrap" role="region">
 <table id="tblBudget">
 <thead><tr>
-<th scope="col">Event</th><th scope="col">Category</th><th scope="col">Item</th><th scope="col">Vendor</th><th scope="col">Qty</th><th scope="col">Unit Cost</th><th scope="col">Tax %</th><th scope="col">Forecast</th><th scope="col">Actual</th><th scope="col">Variance</th><th scope="col">Vendor Status</th><th scope="col">Payment</th><th scope="col">Proof</th><th scope="col">Confirmation</th><th class="no-print" scope="col">Actions</th>
+<th scope="col">Event</th><th scope="col">Category</th><th scope="col">Item</th><th scope="col">Vendor</th><th scope="col">Qty</th><th scope="col">Unit Cost</th><th scope="col">Tax %</th><th scope="col">Forecast</th><th scope="col">Actual</th><th scope="col">Variance</th><th scope="col">Vendor Status</th><th scope="col">Payment Received</th><th scope="col">Vendor Paid</th><th scope="col">Proof</th><th scope="col">Confirmation</th><th class="no-print" scope="col">Actions</th>
 </tr></thead><tbody></tbody>
 <tfoot><tr>
 <th colspan="7" scope="row">Totals</th>
 <th aria-live="polite" id="sumForecast">0.00</th>
 <th aria-live="polite" id="sumActual">0.00</th>
 <th aria-live="polite" id="sumVariance">0.00</th>
+<th></th>
+<th></th>
+<th></th>
 <th></th>
 <th></th>
 <th></th>
@@ -1068,7 +1145,8 @@ Perf notes:
 <div><div class="small">Forecast</div><input data-testid="budget-forecast" id="bForecast" min="0" step="0.01" type="number" value="0"/></div>
 <div><div class="small">Actual</div><input data-testid="budget-actual" id="bActual" min="0" step="0.01" type="number" value="0"/></div>
 <div><div class="small">Vendor confirmation</div><label class="checkbox"><input id="bVendorConfirmed" type="checkbox"/> Vendor will deliver</label></div>
-<div><div class="small">Payment status</div><select id="bPaymentStatus"><option value="unpaid">Unpaid</option><option value="paid">Paid</option></select></div>
+<div><div class="small">Payment received</div><label class="checkbox"><input id="bPaymentReceived" type="checkbox"/> Payment received &amp; confirmed</label></div>
+<div><div class="small">Vendor paid</div><label class="checkbox"><input id="bVendorPaid" type="checkbox"/> Vendor invoice settled</label></div>
 <div style="grid-column:1 / span 2;"><div class="small">Payment proof (PDF)</div><label class="ghost file-trigger" for="bProof"><svg class="icon"><use href="#ic-upload"></use></svg> <span id="bProofLabel">Upload proof</span></label><input accept="application/pdf" class="sr-only" id="bProof" type="file"/><div class="small muted" id="bProofMeta"></div></div>
 <div style="grid-column:1/-1"><div class="small">Notes</div><textarea data-testid="budget-notes" id="bNotes"></textarea></div>
 </form>
@@ -1905,10 +1983,28 @@ qs("#scopeEvent")?.addEventListener("change", (e)=>{
 
 /* ---------- Store ---------- */
 const LS_KEY="epp_data_v1";
-const store={data:{events:[],tasks:[],notes:[],timeline:[],vendors:[],budget:[],pois:[],profiles:[]},
-  load(){try{const raw=localStorage.getItem(LS_KEY); if(raw) this.data=JSON.parse(raw)}catch(e){console.error(e)}},
+const defaultData=()=>({
+  events:[],
+  tasks:[],
+  notes:[],
+  timeline:[],
+  vendors:[],
+  budget:[],
+  pois:[],
+  profiles:[],
+  vendorComparisons:[],
+  scenarios:[],
+  settings:{ currencySymbol:"MX$" }
+});
+const store={data:defaultData(),
+  load(){
+    try{
+      const raw=localStorage.getItem(LS_KEY);
+      if(raw) this.data={...defaultData(), ...JSON.parse(raw)};
+    }catch(e){console.error(e)}
+  },
   save(){localStorage.setItem(LS_KEY,JSON.stringify(this.data))},
-  reset(){this.data={events:[],tasks:[],notes:[],timeline:[],vendors:[],budget:[],pois:[],profiles:[]}; this.save()},
+  reset(){this.data=defaultData(); this.save()},
   upsert(col,obj){if(!obj.id){obj.id=uid(col.slice(0,3))} const a=this.data[col], i=a.findIndex(x=>x.id===obj.id); if(i>=0)a[i]=obj; else a.push(obj); this.save(); return obj.id},
   remove(col,id){this.data[col]=this.data[col].filter(x=>x.id!==id); this.save()}
 };
@@ -1916,9 +2012,9 @@ window.store = store;
 function seedDemo(){
   const t=todayYMD();
   const ev=[
-    { id:uid("evt"), title:"Martínez Wedding", eventType:"Wedding", eventDate:addDays(t,30), address:"Zócalo, Centro, Ciudad de México", status:"Planning", owner:"laura@yourorg.com", lat:19.4326, lon:-99.1332 },
-    { id:uid("evt"), title:"García Baptism", eventType:"Baptism", eventDate:addDays(t,18), address:"Catedral de Guadalajara, Jalisco", status:"Planning", owner:"diego@yourorg.com", lat:20.6769, lon:-103.3466 },
-    { id:uid("evt"), title:"Fernández Anniversary Party", eventType:"Party", eventDate:addDays(t,7), address:"Macroplaza, Monterrey, NL", status:"Executing", owner:"ana@yourorg.com", lat:25.6714, lon:-100.309 }
+    { id:uid("evt"), title:"Martínez Wedding", eventType:"Wedding", eventDate:addDays(t,30), address:"Zócalo, Centro, Ciudad de México", status:"Planning", owner:"laura@yourorg.com", lat:19.4326, lon:-99.1332, revenuePlanned:52000, revenueActual:50000, attendeesPlanned:180, attendeesActual:170 },
+    { id:uid("evt"), title:"García Baptism", eventType:"Baptism", eventDate:addDays(t,18), address:"Catedral de Guadalajara, Jalisco", status:"Planning", owner:"diego@yourorg.com", lat:20.6769, lon:-103.3466, revenuePlanned:24000, revenueActual:22500, attendeesPlanned:120, attendeesActual:110 },
+    { id:uid("evt"), title:"Fernández Anniversary Party", eventType:"Party", eventDate:addDays(t,7), address:"Macroplaza, Monterrey, NL", status:"Executing", owner:"ana@yourorg.com", lat:25.6714, lon:-100.309, revenuePlanned:32000, revenueActual:31000, attendeesPlanned:140, attendeesActual:136 }
   ];
   const tasks=[
     { id:uid("tsk"), eventId:ev[0].id, title:"Confirm venue", dueDate:addDays(t,3), assignedTo:"Carlos", status:"In Progress", completedDate:"", notes:"Awaiting deposit" },
@@ -1938,9 +2034,9 @@ function seedDemo(){
     { id:uid("ven"), name:"FotoPro MX", company:"FotoPro", role:"Photography", email:"info@fotopro.mx", phone:"+52 33 1111 2222", contract:"Signed", docs:"Contract", docFiles:[], services:[photoSvc] }
   ];
     const budget=[
-      { id:uid("bud"), eventId:ev[0].id, cat:"Venue", item:"Hall Rental", qty:1, unit:25000, tax:16, forecast:29000, actual:0, notes:"Includes chairs", vendorConfirmed:false, paymentStatus:'unpaid' },
-      { id:uid("bud"), eventId:ev[0].id, cat:"Catering", item:"Dinner", qty:120, unit:550, tax:16, vendorId: vendors[0].id, vendorServiceId: cateringSvc.id, catalogRefId: cateringSvc.refId, catalogType: cateringSvc.type, forecast:0, actual:cateringSvc.price, vendorConfirmed:true, paymentStatus:'paid', notes:"3-course" },
-      { id:uid("bud"), eventId:ev[2].id, cat:"Music", item:"DJ Package", qty:1, unit:8000, tax:0, forecast:8000, actual:0, notes:"", vendorId: vendors[1].id, vendorServiceId: photoSvc.id, catalogRefId: photoSvc.refId, catalogType: photoSvc.type, vendorConfirmed:false, paymentStatus:'unpaid' }
+      { id:uid("bud"), eventId:ev[0].id, cat:"Venue", item:"Hall Rental", qty:1, unit:25000, tax:16, forecast:29000, actual:0, notes:"Includes chairs", vendorConfirmed:false, paymentReceived:false, vendorPaid:false },
+      { id:uid("bud"), eventId:ev[0].id, cat:"Catering", item:"Dinner", qty:120, unit:550, tax:16, vendorId: vendors[0].id, vendorServiceId: cateringSvc.id, catalogRefId: cateringSvc.refId, catalogType: cateringSvc.type, forecast:0, actual:cateringSvc.price, vendorConfirmed:true, paymentReceived:true, vendorPaid:true, notes:"3-course" },
+      { id:uid("bud"), eventId:ev[2].id, cat:"Music", item:"DJ Package", qty:1, unit:8000, tax:0, forecast:8000, actual:0, notes:"", vendorId: vendors[1].id, vendorServiceId: photoSvc.id, catalogRefId: photoSvc.refId, catalogType: photoSvc.type, vendorConfirmed:false, paymentReceived:false, vendorPaid:false }
     ];
   const pois=[
     { id:uid("poi"), label:"Hotel Centro", type:"Hotel", lat:19.434, lon:-99.14, address:"Hotel Centro Histórico, Ciudad de México", eventId:ev[0].id },
@@ -3157,6 +3253,7 @@ function formatMonthLabel(ym){
 function renderAnalysis(){
   const actualContainer=qs("#analysisActual");
   const forecastContainer=qs("#analysisPredictions");
+  const profitCard=qs("#analysisProfitCard");
   if(!(actualContainer && forecastContainer)) return;
   const actualCard=actualContainer.closest(".analysis-card");
   const forecastCard=forecastContainer.closest(".analysis-card");
@@ -3175,11 +3272,19 @@ function renderAnalysis(){
   const inScope=state.currentTab==="dashboard" || state.currentTab==="analysis";
   if(!inScope){
     toggleCards(false);
+    if(profitCard){
+      profitCard.setAttribute("hidden","true");
+      profitCard.setAttribute("aria-hidden","true");
+    }
     actualContainer.innerHTML="";
     forecastContainer.innerHTML="";
     return;
   }
   toggleCards(true);
+  if(profitCard){
+    profitCard.removeAttribute("hidden");
+    profitCard.removeAttribute("aria-hidden");
+  }
   actualContainer.innerHTML="";
   forecastContainer.innerHTML="";
 
@@ -3263,6 +3368,98 @@ function renderAnalysis(){
       }
     ];
     actualContainer.appendChild(buildAnalysisList(metrics));
+  }
+
+  if(profitCard){
+    const moneySym=store.data.settings?.currencySymbol||"MX$";
+    const fmtMoneySym=n=>moneySym+(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0});
+    const revEl=qs('#analysisRevenueValue');
+    const revDetail=qs('#analysisRevenueDetail');
+    const revReceived=qs('#analysisRevenueReceived');
+    const revPending=qs('#analysisRevenuePending');
+    const profEl=qs('#analysisProfitValue');
+    const profDetail=qs('#analysisProfitDetail');
+    const profForecast=qs('#analysisProfitForecast');
+    const costForecast=qs('#analysisCostForecast');
+    const costPaid=qs('#analysisCostPaid');
+    const costPending=qs('#analysisCostPending');
+    const marEl=qs('#analysisMarginValue');
+    const marDetail=qs('#analysisMarginDetail');
+    const vendorShareText=qs('#analysisVendorShare');
+    const vendorList=qs('#analysisVendorList');
+    vendorList.innerHTML="";
+
+    if(!contextsInScope.length){
+      revEl.textContent=fmtMoneySym(0);
+      revDetail.textContent="Add events to see revenue.";
+      if(revReceived) revReceived.textContent=`Payment received — ${fmtMoneySym(0)}`;
+      if(revPending) revPending.textContent=`Not received yet — ${fmtMoneySym(0)}`;
+      profEl.textContent=fmtMoneySym(0);
+      profDetail.textContent="Costs will appear once budget lines are linked.";
+      if(profForecast) profForecast.textContent=`Forecast of profit — ${fmtMoneySym(0)}`;
+      if(costForecast) costForecast.textContent=`Costs forecast — ${fmtMoneySym(0)}`;
+      if(costPaid) costPaid.textContent=`Payments made to vendors — ${fmtMoneySym(0)}`;
+      if(costPending) costPending.textContent=`Not yet made — ${fmtMoneySym(0)}`;
+      marEl.textContent="0.0%";
+      marDetail.textContent="Margin requires revenue and costs.";
+      vendorShareText.textContent="No vendors in scope yet.";
+    }else{
+      let revenueActual=0, revenuePlanned=0, attendees=0, costActual=0;
+      let paymentReceived=0, vendorPaid=0, costPlanned=0;
+      const vendorMap=new Map();
+      contextsInScope.forEach(ctx=>{
+        const ev=ctx?.event||{};
+        const totals=window.KPI?.sumBudgetTotalsForEvent
+          ? window.KPI.sumBudgetTotalsForEvent(ev.id, store)
+          : { forecast:0, recognizedRevenue:0, recognizedCost:0, byVendorRecognized:new Map() };
+        revenueActual+=Number(totals.recognizedRevenue||0) || 0;
+        revenuePlanned+=Number(totals.forecast||0) || 0;
+        paymentReceived+=Number(totals.paymentReceivedTotal||0) || 0;
+        attendees+=Number(ev.attendeesActual||ev.attendeesPlanned||0) || 0;
+        costActual+=Number(totals.recognizedCost||0) || 0;
+        vendorPaid+=Number(totals.vendorPaidTotal||0) || 0;
+        costPlanned+=Number(totals.actual||0) || 0;
+        (totals.byVendorRecognized||new Map()).forEach((val,vid)=>{
+          vendorMap.set(vid,(vendorMap.get(vid)||0)+(Number(val)||0));
+        });
+      });
+      const profit=revenueActual-costActual;
+      const margin=revenueActual>0?(profit/revenueActual)*100:0;
+      const costPerGuest=attendees>0?costActual/attendees:0;
+      const pendingReceipt=Math.max(0,revenuePlanned-paymentReceived);
+      const pendingVendor=Math.max(0,costPlanned-vendorPaid);
+      const profitForecast=revenuePlanned-costPlanned;
+      revEl.textContent=fmtMoneySym(revenueActual);
+      revDetail.textContent=revenuePlanned>0
+        ? `Forecast ${fmtMoneySym(revenuePlanned)}`
+        : "Planned revenue will appear once paid";
+      if(revReceived) revReceived.textContent=`Payment received — ${fmtMoneySym(paymentReceived)}`;
+      if(revPending) revPending.textContent=`Not received yet — ${fmtMoneySym(pendingReceipt)}`;
+      profEl.textContent=fmtMoneySym(profit);
+      profDetail.textContent=revenueActual>0 && costActual>0
+        ? `Costs ${fmtMoneySym(costActual)} • Cost/guest ${fmtMoneySym(costPerGuest)}`
+        : "Revenue and vendor payments must be confirmed";
+      if(profForecast) profForecast.textContent=`Forecast of profit — ${fmtMoneySym(profitForecast)}`;
+      if(costForecast) costForecast.textContent=`Costs forecast — ${fmtMoneySym(costPlanned)}`;
+      if(costPaid) costPaid.textContent=`Payments made to vendors — ${fmtMoneySym(vendorPaid)}`;
+      if(costPending) costPending.textContent=`Not yet made — ${fmtMoneySym(pendingVendor)}`;
+      marEl.textContent=`${margin.toFixed(1)}%`;
+      marDetail.textContent=revenueActual>0 && costActual>0?"Margin on confirmed revenue and paid vendors":"Margin waits for payment receipts";
+
+      const share=window.KPI?.vendorShare?.(vendorMap)||[];
+      if(!share.length){
+        vendorShareText.textContent="No vendor spend recorded yet.";
+      }else{
+        vendorShareText.textContent="Top vendors by actual or forecasted spend.";
+        share.forEach(entry=>{
+          const vendor=store.data.vendors.find(v=>v.id===entry.vendorId);
+          const name=vendor?.name||vendor?.company||entry.vendorId||"Vendor";
+          const li=document.createElement('li');
+          li.textContent=`${name} — ${fmtMoneySym(entry.total)} (${entry.sharePct.toFixed(1)}%)`;
+          vendorList.appendChild(li);
+        });
+      }
+    }
   }
 
   const predictions=[];
@@ -3533,7 +3730,7 @@ function renderEventsTable(){
   const fill=qs("#eventsGlobalProgressFill"); if(fill) fill.style.width=`${globalPercent}%`;
 }
 function resetEventForm(){
-  ["eId","eTitle","eOwner","eLat","eLon","eAddress"].forEach(id=>{const el=qs("#"+id); if(el) el.value=""});
+  ["eId","eTitle","eOwner","eLat","eLon","eAddress","eRevenuePlanned","eRevenueActual","eAttendeesPlanned","eAttendeesActual"].forEach(id=>{const el=qs("#"+id); if(el) el.value=""});
   if(qs("#eType")) qs("#eType").value="Wedding";
   if(qs("#eStatus")) qs("#eStatus").value="Planning";
   if(qs("#eDate")) qs("#eDate").value="";
@@ -3566,6 +3763,10 @@ function syncEventForm(ev){
     statusSelect.value=ev.status||"Planning";
   }
   const ownerInput=qs("#eOwner"); if(ownerInput) ownerInput.value=ev.owner||"";
+  const revPlan=qs("#eRevenuePlanned"); if(revPlan) revPlan.value=ev.revenuePlanned??"";
+  const revAct=qs("#eRevenueActual"); if(revAct) revAct.value=ev.revenueActual??"";
+  const attPlan=qs("#eAttendeesPlanned"); if(attPlan) attPlan.value=ev.attendeesPlanned??"";
+  const attAct=qs("#eAttendeesActual"); if(attAct) attAct.value=ev.attendeesActual??"";
   const addressInput=qs("#eAddress"); if(addressInput) addressInput.value=ev.address||"";
   const latInput=qs("#eLat");
   const lonInput=qs("#eLon");
@@ -3723,6 +3924,10 @@ async function resolveAddress(q){
 qs("#btnSaveEvent")?.addEventListener("click", async ()=>{
   const title=qs("#eTitle")?.value.trim(); const type=qs("#eType")?.value; const date=qs("#eDate")?.value;
   const status=qs("#eStatus")?.value; const owner=qs("#eOwner")?.value.trim(); const address=qs("#eAddress")?.value.trim();
+  const revenuePlanned=Number(qs("#eRevenuePlanned")?.value||0)||0;
+  const revenueActual=Number(qs("#eRevenueActual")?.value||0)||0;
+  const attendeesPlanned=Number(qs("#eAttendeesPlanned")?.value||0)||0;
+  const attendeesActual=Number(qs("#eAttendeesActual")?.value||0)||0;
   if(!title || !date){ alert("Please fill Title and Date"); return }
 // Prevent duplicate event titles (case-insensitive)
 const currentId = (qs("#eId")?.value || "").trim();
@@ -3750,7 +3955,21 @@ if (dup) {
   }
   if(!pick){ alert("Please select an address from suggestions (or type a full address and try again)."); return }
 
-    const e={ id:(qs("#eId")?.value||"").trim()||null, title, eventType:type, eventDate:date, status, owner, address:pick.display_name, lat:pick.lat, lon:pick.lon };
+    const e={
+      id:(qs("#eId")?.value||"").trim()||null,
+      title,
+      eventType:type,
+      eventDate:date,
+      status,
+      owner,
+      address:pick.display_name,
+      lat:pick.lat,
+      lon:pick.lon,
+      revenuePlanned,
+      revenueActual,
+      attendeesPlanned,
+      attendeesActual
+    };
 
   // Save and capture the actual id (important for new events)
   const savedId = store.upsert("events", e);
@@ -4812,11 +5031,16 @@ qs('#bProof')?.addEventListener('change', async (e)=>{
       const vendorConfirmClass = b.vendorConfirmed ? 's-completed' : 's-warning';
       const vendorConfirmText = b.vendorConfirmed ? 'Vendor confirmed' : 'Awaiting vendor';
       const vendorConfirmBtn = `<button class="${b.vendorConfirmed?'ghost':'success'}" title="${b.vendorConfirmed?'Mark unconfirmed':'Vendor will deliver'}" onclick="toggleVendorCommitment('${b.id}')"><svg class="icon"><use href="${b.vendorConfirmed?'#ic-refresh':'#ic-check'}"></use></svg></button>`;
-      const paymentStatus = (b.paymentStatus||'unpaid') === 'paid' ? 'Paid' : 'Unpaid';
-      const paymentClass = paymentStatus==='Paid' ? 's-completed' : 's-warning';
-      const paymentBtn = `<button class="${paymentStatus==='Paid'?'ghost':'success'}" title="${paymentStatus==='Paid'?'Mark unpaid':'Mark paid'}" onclick="togglePaymentStatus('${b.id}')"><svg class="icon"><use href="${paymentStatus==='Paid'?'#ic-refresh':'#ic-check'}"></use></svg></button>`;
+      const paymentReceived = b.paymentReceived === true;
+      const paymentReceivedLabel = paymentReceived ? 'Received' : 'Pending receipt';
+      const paymentReceivedClass = paymentReceived ? 's-completed' : 's-warning';
+      const paymentReceivedBtn = `<button class="${paymentReceived?'ghost':'success'}" title="${paymentReceived?'Mark not received':'Confirm payment received'}" onclick="togglePaymentReceived('${b.id}')"><svg class="icon"><use href="${paymentReceived?'#ic-refresh':'#ic-check'}"></use></svg></button>`;
+      const vendorPaid = b.vendorPaid === true;
+      const vendorPaidLabel = vendorPaid ? 'Vendor paid' : 'Vendor unpaid';
+      const vendorPaidClass = vendorPaid ? 's-completed' : 's-warning';
+      const vendorPaidBtn = `<button class="${vendorPaid?'ghost':'success'}" title="${vendorPaid?'Mark unpaid':'Mark vendor paid'}" onclick="toggleVendorPaid('${b.id}')"><svg class="icon"><use href="${vendorPaid?'#ic-refresh':'#ic-check'}"></use></svg></button>`;
       const proofCell = b.paymentProofData ? `<button class="ghost" onclick="openPaymentProof('${b.id}')"><svg class="icon"><use href="#ic-download"></use></svg> View</button>` : '<span class="small muted">None</span>';
-      tr.innerHTML=`<td>${ev?ev.title:"—"}</td><td>${b.cat||""}</td><td>${b.item||""}</td><td>${vendorCell}</td><td>${b.qty??1}</td><td>${fmtMoney(b.unit||0)}</td><td>${toNumber(b.tax||0).toFixed(2)}</td><td>${fmtMoney(forecast)}</td><td>${fmtMoney(actual)}</td><td>${fmtMoney(variance)}</td><td><span class="status ${vendorConfirmClass}">${vendorConfirmText}</span> ${vendorConfirmBtn}</td><td><span class="status ${paymentClass}">${paymentStatus}</span> ${paymentBtn}</td><td>${proofCell}</td><td class="budget-confirmation ${confirmationClass}">${confirmationLabel}</td><td class="row no-print">${toggleBtn}<button class="ghost" title="Edit" onclick="editLine('${b.id}')"><svg class="icon"><use href="#ic-edit"></use></svg></button><button class="danger" title="Delete" onclick="delLine('${b.id}')"><svg class="icon"><use href="#ic-trash"></use></svg></button></td>`;
+      tr.innerHTML=`<td>${ev?ev.title:"—"}</td><td>${b.cat||""}</td><td>${b.item||""}</td><td>${vendorCell}</td><td>${b.qty??1}</td><td>${fmtMoney(b.unit||0)}</td><td>${toNumber(b.tax||0).toFixed(2)}</td><td>${fmtMoney(forecast)}</td><td>${fmtMoney(actual)}</td><td>${fmtMoney(variance)}</td><td><span class="status ${vendorConfirmClass}">${vendorConfirmText}</span> ${vendorConfirmBtn}</td><td><span class="status ${paymentReceivedClass}">${paymentReceivedLabel}</span> ${paymentReceivedBtn}</td><td><span class="status ${vendorPaidClass}">${vendorPaidLabel}</span> ${vendorPaidBtn}</td><td>${proofCell}</td><td class="budget-confirmation ${confirmationClass}">${confirmationLabel}</td><td class="row no-print">${toggleBtn}<button class="ghost" title="Edit" onclick="editLine('${b.id}')"><svg class="icon"><use href="#ic-edit"></use></svg></button><button class="danger" title="Delete" onclick="delLine('${b.id}')"><svg class="icon"><use href="#ic-trash"></use></svg></button></td>`;
       frag.appendChild(tr);
     });
   tbody.appendChild(frag);
@@ -4824,7 +5048,7 @@ qs('#bProof')?.addEventListener('change', async (e)=>{
   qs("#sumActual").textContent=fmtMoney(sumA);
   qs("#sumVariance").textContent=fmtMoney(sumA-sumF);
 }
-    function resetLineForm(){ ["bId","bCat","bItem","bNotes"].forEach(id=>{const el=qs("#"+id); if(el) el.value=""}); ["bQty","bUnit","bTax","bForecast","bActual"].forEach(id=>{const el=qs("#"+id); if(el) el.value="0"}); setBudgetCatalogContext('', ''); state.budgetServiceDrafts=[{ vendorId:'', vendorServiceId:'', name:'', qty:1 }]; fillEventSelectors(); renderBudgetServiceRows(); const vendorConfirm=qs('#bVendorConfirmed'); if(vendorConfirm) vendorConfirm.checked=false; const paymentSel=qs('#bPaymentStatus'); if(paymentSel) paymentSel.value='unpaid'; clearBudgetProofDraft(); }
+    function resetLineForm(){ ["bId","bCat","bItem","bNotes"].forEach(id=>{const el=qs("#"+id); if(el) el.value=""}); ["bQty","bUnit","bTax","bForecast","bActual"].forEach(id=>{const el=qs("#"+id); if(el) el.value="0"}); setBudgetCatalogContext('', ''); state.budgetServiceDrafts=[{ vendorId:'', vendorServiceId:'', name:'', qty:1 }]; fillEventSelectors(); renderBudgetServiceRows(); const vendorConfirm=qs('#bVendorConfirmed'); if(vendorConfirm) vendorConfirm.checked=false; const paymentReceived=qs('#bPaymentReceived'); if(paymentReceived) paymentReceived.checked=false; const vendorPaid=qs('#bVendorPaid'); if(vendorPaid) vendorPaid.checked=false; clearBudgetProofDraft(); }
     function editLine(id){
       const b=store.data.budget.find(x=>x.id===id); if(!b) return;
       qs("#bId").value=b.id; qs("#bEvent").value=b.eventId||""; qs("#bCat").value=b.cat||""; qs("#bItem").value=b.item||"";
@@ -4836,7 +5060,8 @@ qs('#bProof')?.addEventListener('change', async (e)=>{
       renderBudgetServiceRows();
       qs("#bQty").value=b.qty??1; qs("#bUnit").value=b.unit??0; qs("#bTax").value=b.tax??0; qs("#bForecast").value=b.forecast??0; qs("#bActual").value=b.actual??0; qs("#bNotes").value=b.notes||"";
       const vendorConfirm=qs('#bVendorConfirmed'); if(vendorConfirm) vendorConfirm.checked = Boolean(b.vendorConfirmed);
-      const paymentSel=qs('#bPaymentStatus'); if(paymentSel) paymentSel.value = b.paymentStatus || 'unpaid';
+      const paymentReceived=qs('#bPaymentReceived'); if(paymentReceived) paymentReceived.checked = Boolean(b.paymentReceived);
+      const vendorPaid=qs('#bVendorPaid'); if(vendorPaid) vendorPaid.checked = Boolean(b.vendorPaid);
   state.budgetProofDraft = b.paymentProofData ? { name: b.paymentProofName, data: b.paymentProofData } : null;
   updateBudgetProofPreview(b);
   navigate("#/budget");
@@ -4849,10 +5074,17 @@ function toggleVendorCommitment(id){
   store.save();
   renderAll('budget');
 }
-function togglePaymentStatus(id){
+function togglePaymentReceived(id){
   const line = store.data.budget.find(x=>x.id===id);
   if(!line) return;
-  line.paymentStatus = line.paymentStatus === 'paid' ? 'unpaid' : 'paid';
+  line.paymentReceived = !line.paymentReceived;
+  store.save();
+  renderAll('budget');
+}
+function toggleVendorPaid(id){
+  const line = store.data.budget.find(x=>x.id===id);
+  if(!line) return;
+  line.vendorPaid = !line.vendorPaid;
   store.save();
   renderAll('budget');
 }
@@ -4905,7 +5137,7 @@ function toggleLineConfirmation(id){
         const serviceTotals = calculateServicePriceTotals(serviceDrafts, lineQty || 1);
         const derivedActual = serviceTotals.hasPricedService ? serviceTotals.total : toNumber(qs("#bActual")?.value);
         const resolvedUnit = unitInput || (serviceTotals.firstPrice ?? 0);
-        const b={ id:(qs("#bId")?.value||"").trim()||null, eventId:qs("#bEvent")?.value||"", cat:qs("#bCat")?.value.trim(), item:qs("#bItem")?.value.trim(), vendorId:primaryService.vendorId||"", vendorServiceId:primaryService.vendorServiceId||"", vendorServices:serviceDrafts, qty:lineQty, unit:resolvedUnit, tax:toNumber(qs("#bTax")?.value), forecast:toNumber(qs("#bForecast")?.value), actual:derivedActual, vendorConfirmed:Boolean(qs('#bVendorConfirmed')?.checked), paymentStatus:(qs('#bPaymentStatus')?.value||'unpaid'), paymentProofName:state.budgetProofDraft?.name||"", paymentProofData:state.budgetProofDraft?.data||"", catalogRefId:(qs('#bCatalogRef')?.value||'').trim(), catalogType:(qs('#bCatalogType')?.value||'').trim(), notes:qs("#bNotes")?.value.trim() };
+        const b={ id:(qs("#bId")?.value||"").trim()||null, eventId:qs("#bEvent")?.value||"", cat:qs("#bCat")?.value.trim(), item:qs("#bItem")?.value.trim(), vendorId:primaryService.vendorId||"", vendorServiceId:primaryService.vendorServiceId||"", vendorServices:serviceDrafts, qty:lineQty, unit:resolvedUnit, tax:toNumber(qs("#bTax")?.value), forecast:toNumber(qs("#bForecast")?.value), actual:derivedActual, vendorConfirmed:Boolean(qs('#bVendorConfirmed')?.checked), paymentReceived:Boolean(qs('#bPaymentReceived')?.checked), vendorPaid:Boolean(qs('#bVendorPaid')?.checked), paymentProofName:state.budgetProofDraft?.name||"", paymentProofData:state.budgetProofDraft?.data||"", catalogRefId:(qs('#bCatalogRef')?.value||'').trim(), catalogType:(qs('#bCatalogType')?.value||'').trim(), notes:qs("#bNotes")?.value.trim() };
   if(b.id){
     const existing=store.data.budget.find(x=>x.id===b.id);
       if(existing){
@@ -4929,7 +5161,7 @@ function toggleLineConfirmation(id){
 });
 qs("#btnResetLine")?.addEventListener("click", resetLineForm);
 qs("#btnExportCSV")?.addEventListener("click",()=>{
-    const headers=["Event","Category","Item","Vendor","Service","Qty","Unit","Tax%","Forecast","Actual","Variance","Vendor Status","Payment","Proof","Confirmation","Notes"];
+    const headers=["Event","Category","Item","Vendor","Service","Qty","Unit","Tax%","Forecast","Actual","Variance","Vendor Status","Payment","Payment Received","Vendor Paid","Proof","Confirmation","Notes"];
     let csv=headers.join(",")+"\n";
     const eventsById=state.graph?.eventsById || new Map();
     const vendorsById=new Map(store.data.vendors.map(v=>[v.id,v]));
@@ -4956,7 +5188,7 @@ qs("#btnExportCSV")?.addEventListener("click",()=>{
         const totals = calculateServicePriceTotals(serviceEntries, b.qty ?? 1);
         const actual=totals.hasPricedService ? totals.total : toNumber(b.actual);
         const variance=actual-forecast;
-      const row=[(ev?ev.title:""), b.cat||"", b.item||"", vendorName, serviceName, b.qty??1, b.unit??0, b.tax??0, forecast, actual, variance, (b.vendorConfirmed?"Vendor confirmed":"Awaiting vendor"), (b.paymentStatus==='paid'?'Paid':'Unpaid'), (b.paymentProofData?'Yes':'No'), (b.confirmed?"Confirmed":"Pending"), (b.notes||"").replace(/,/g,";")];
+      const row=[(ev?ev.title:""), b.cat||"", b.item||"", vendorName, serviceName, b.qty??1, b.unit??0, b.tax??0, forecast, actual, variance, (b.vendorConfirmed?"Vendor confirmed":"Awaiting vendor"), (b.paymentReceived?'Received':'Pending'), (b.vendorPaid?'Paid':'Unpaid'), (b.paymentProofData?'Yes':'No'), (b.confirmed?"Confirmed":"Pending"), (b.notes||"").replace(/,/g,";")];
     csv+=row.join(",")+"\n";
   });
   const blob=new Blob([csv],{type:"text/csv"});
